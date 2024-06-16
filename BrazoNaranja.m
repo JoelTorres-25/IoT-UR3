@@ -1,14 +1,19 @@
 function [bit,finalFrame,lines] = BrazoNaranja(videoFrame)
 A= videoFrame;
+%Usamos la fotografia tomada como parametro de entrada a la funcion de segmentacion por color
 [BW,~] = generadorMascaraNaranja(A);
+%Resultado de salida es una imagen binarizada que se limpia
 im6 = imfill(BW,"holes");
 j1 = bwareaopen(im6,300);
+%Esqueletonizamos con operacion morfologica
 BW3 = bwmorph(j1,"skel",25);
+%Usamos Transformada de Hough para detectar lineas rectas
 [H,theta,rho] = hough(BW3);
 peaks = houghpeaks(H,1);
 lines = houghlines(BW3,theta,rho,peaks);
 numLines = length(lines);
 bit = 0;
+%Si es detectada una linea recta se grafica dentro de la imagen original con las coordenadas de sus puntos
 if numLines==1
     xy = [lines(1).point1; lines(1).point2];
     finalFrame= insertShape(A, 'Line', [xy(1,:) xy(2,:)], ...
@@ -31,6 +36,7 @@ if numLines==1
         %disp('Posición B');
     end    
 else
+    %En caso contrario de no detectar linea recta se regresa como salida de la funcion la imagen original
     finalFrame = videoFrame;
 end
 
